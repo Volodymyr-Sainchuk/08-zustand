@@ -1,7 +1,7 @@
 import { fetchNoteById } from "@/lib/api";
-import type { Metadata } from "next";
 import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query";
 import NoteDetailsClient from "./NoteDetails.client";
+import type { Metadata } from "next";
 
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
   const note = await fetchNoteById(params.id);
