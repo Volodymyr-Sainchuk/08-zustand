@@ -7,8 +7,13 @@ type Props = {
   params: { id: string };
 };
 
+function asPromise<T>(value: T): Promise<T> {
+  return Promise.resolve(value);
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const note = await fetchNoteById(params.id);
+  const { id } = await asPromise(params);
+  const note = await fetchNoteById(id);
 
   if (!note) {
     return {
@@ -17,7 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       openGraph: {
         title: "Нотатку не знайдено – NoteHub",
         description: "Ця нотатка була видалена або не існує.",
-        url: `https://notehub.com/notes/${params.id}`,
+        url: `https://notehub.com/notes/${id}`,
       },
     };
   }
@@ -35,16 +40,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function NoteDetailsPage({ params }: Props) {
+  const { id } = await asPromise(params);
   const queryClient = new QueryClient();
 
   await queryClient.prefetchQuery({
-    queryKey: ["note", params.id],
-    queryFn: () => fetchNoteById(params.id),
+    queryKey: ["note", id],
+    queryFn: () => fetchNoteById(id),
   });
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <NoteDetailsClient id={params.id} />
+      <NoteDetailsClient id={id} />
     </HydrationBoundary>
   );
 }
