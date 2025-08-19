@@ -3,17 +3,9 @@ import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query
 import NoteDetailsClient from "./NoteDetails.client";
 import type { Metadata } from "next";
 
-type Props = {
-  params: { id: string };
-};
-
-function asPromise<T>(value: T): Promise<T> {
-  return Promise.resolve(value);
-}
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { id } = await asPromise(params);
-  const note = await fetchNoteById(id);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function generateMetadata({ params }: any): Promise<Metadata> {
+  const note = await fetchNoteById(params.id);
 
   if (!note) {
     return {
@@ -22,7 +14,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       openGraph: {
         title: "Нотатку не знайдено – NoteHub",
         description: "Ця нотатка була видалена або не існує.",
-        url: `https://notehub.com/notes/${id}`,
+        url: `https://notehub.com/notes/${params.id}`,
       },
     };
   }
@@ -39,18 +31,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function NoteDetailsPage({ params }: Props) {
-  const { id } = await asPromise(params);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default async function NoteDetails({ params }: any) {
   const queryClient = new QueryClient();
 
   await queryClient.prefetchQuery({
-    queryKey: ["note", id],
-    queryFn: () => fetchNoteById(id),
+    queryKey: ["note", params.id],
+    queryFn: () => fetchNoteById(params.id),
   });
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <NoteDetailsClient id={id} />
+      <NoteDetailsClient id={params.id} />
     </HydrationBoundary>
   );
 }
