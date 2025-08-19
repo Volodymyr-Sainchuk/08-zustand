@@ -67,8 +67,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children, modal }: LayoutProps) {
   return (
-    <html lang="en" className={roboto.variable}>
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+    <html lang="en">
+      <body className={`${roboto.variable} ${geistSans.variable} ${geistMono.variable}`}>
         <TanStackProvider>
           <Suspense fallback={null}>
             <Header tags={tags} />

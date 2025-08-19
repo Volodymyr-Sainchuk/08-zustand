@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import css from "./NoteForm.module.css";
@@ -14,38 +13,22 @@ export default function NoteForm() {
   const { draft, setDraft, clearDraft } = useNoteStore();
   const createMutation = useCreateNote();
 
-  // Локальний стейт для контролю форми
-  const [title, setTitle] = useState(draft.title);
-  const [content, setContent] = useState(draft.content);
-  const [tag, setTag] = useState<DraftNote["tag"]>(draft.tag);
-
-  // Зберігаємо draft у стор при кожній зміні полів
-  useEffect(() => {
-    setDraft({ title, content, tag });
-  }, [title, content, tag, setDraft]);
-
-  // Обробка сабміту
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const newNote: NewNote = { title, content, tag };
+    const newNote: NewNote = { ...draft };
 
     createMutation.mutate(newNote, {
       onSuccess: () => {
         toast.success("Нотатку створено.");
-        clearDraft(); // очищаємо draft
-        queryClient.invalidateQueries({ queryKey: ["notes"] }); // оновлюємо список нотаток
-        router.back(); // повертаємо на попередній маршрут
+        clearDraft();
+        queryClient.invalidateQueries({ queryKey: ["notes"] });
+        router.back();
       },
       onError: () => {
         toast.error("Не вдалося створити нотатку.");
       },
     });
-  };
-
-  // Обробка Cancel
-  const handleCancel = () => {
-    router.back(); // draft не очищаємо
   };
 
   return (
@@ -54,10 +37,9 @@ export default function NoteForm() {
         <label htmlFor="title">Title</label>
         <input
           id="title"
-          name="title"
           type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          value={draft.title}
+          onChange={(e) => setDraft({ title: e.target.value })}
           className={css.input}
           required
         />
@@ -67,10 +49,9 @@ export default function NoteForm() {
         <label htmlFor="content">Content</label>
         <textarea
           id="content"
-          name="content"
           rows={8}
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
+          value={draft.content}
+          onChange={(e) => setDraft({ content: e.target.value })}
           className={css.textarea}
           required
         />
@@ -80,9 +61,8 @@ export default function NoteForm() {
         <label htmlFor="tag">Tag</label>
         <select
           id="tag"
-          name="tag"
-          value={tag}
-          onChange={(e) => setTag(e.target.value as DraftNote["tag"])}
+          value={draft.tag}
+          onChange={(e) => setDraft({ tag: e.target.value as DraftNote["tag"] })}
           className={css.select}
         >
           <option value="Todo">Todo</option>
@@ -94,7 +74,7 @@ export default function NoteForm() {
       </div>
 
       <div className={css.actions}>
-        <button type="button" className={css.cancelButton} onClick={handleCancel}>
+        <button type="button" className={css.cancelButton} onClick={() => router.back()}>
           Cancel
         </button>
         <button type="submit" className={css.submitButton}>
