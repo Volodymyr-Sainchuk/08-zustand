@@ -7,12 +7,12 @@ type RawParams = { params: { id: string } };
 
 type Props = { params: Promise<{ id: string }> };
 
-function asProps(p: Props): Props {
-  return p;
+function asPromiseParams(p: RawParams): Props {
+  return { params: Promise.resolve(p.params) };
 }
 
 export async function generateMetadata({ params }: RawParams): Promise<Metadata> {
-  const { id } = await asProps({ params: Promise.resolve(params) }).params;
+  const { id } = await asPromiseParams({ params }).params;
 
   const note = await fetchNoteById(id);
 
@@ -40,10 +40,8 @@ export async function generateMetadata({ params }: RawParams): Promise<Metadata>
   };
 }
 
-export default async function NoteDetailsPage(raw: RawParams) {
-  const props = asProps({ params: Promise.resolve(raw.params) });
-
-  const { id } = await props.params;
+export default async function NoteDetailsPage({ params }: RawParams) {
+  const { id } = await asPromiseParams({ params }).params;
 
   const queryClient = new QueryClient();
   await queryClient.prefetchQuery({
