@@ -7,31 +7,36 @@ type Props = {
   params: Promise<{ id: string }>;
 };
 
-function wrapParams<T>(params: T): Promise<T> {
-  return Promise.resolve(params);
-}
-
-export async function generateMetadata(raw: { params: { id: string } }): Promise<Metadata> {
-  const props: Props = { params: wrapParams(raw.params) };
-
-  const { id } = await props.params;
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
   const note = await fetchNoteById(id);
 
   if (!note) {
     return {
       title: "Нотатку не знайдено – NoteHub",
       description: "Ця нотатка була видалена або не існує.",
+      openGraph: {
+        title: "Нотатку не знайдено – NoteHub",
+        description: "Ця нотатка була видалена або не існує.",
+        url: `https://notehub.com/notes/${id}`,
+      },
     };
   }
 
   return {
     title: `${note.title} – NoteHub`,
     description: note.content.slice(0, 150),
+    openGraph: {
+      title: note.title,
+      description: note.content.slice(0, 150),
+      type: "article",
+      url: `https://notehub.com/notes/${note.id}`,
+    },
   };
 }
 
-export default async function NoteDetails(raw: { params: { id: string } }) {
-  const props: Props = { params: wrapParams(raw.params) };
+export default async function NoteDetailsPage(raw: { params: { id: string } }) {
+  const props: Props = { params: Promise.resolve(raw.params) };
 
   const { id } = await props.params;
 
