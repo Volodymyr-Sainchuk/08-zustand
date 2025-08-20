@@ -10,8 +10,8 @@ type Props = {
 type NextPageProps = { params: { id: string } };
 
 export async function generateMetadata({ params }: NextPageProps): Promise<Metadata> {
-  const asyncParams: Props["params"] = Promise.resolve(params);
-  const { id } = await asyncParams;
+  const props: Props = { params: Promise.resolve(params) };
+  const { id } = await props.params;
 
   const note = await fetchNoteById(id);
 
@@ -40,8 +40,8 @@ export async function generateMetadata({ params }: NextPageProps): Promise<Metad
 }
 
 export default async function NoteDetailsPage({ params }: NextPageProps) {
-  const asyncParams: Props["params"] = Promise.resolve(params);
-  const { id } = await asyncParams;
+  const props: Props = { params: Promise.resolve(params) };
+  const { id } = await props.params;
 
   const queryClient = new QueryClient();
   await queryClient.prefetchQuery({
