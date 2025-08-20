@@ -39,6 +39,7 @@ export default async function NoteDetailsPage(raw: { params: { id: string } }) {
   const props: Props = { params: Promise.resolve(raw.params) };
 
   const { id } = await props.params;
+  console.log(id);
 
   const queryClient = new QueryClient();
   await queryClient.prefetchQuery({
