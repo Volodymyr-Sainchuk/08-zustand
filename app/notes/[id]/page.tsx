@@ -10,6 +10,7 @@ type Props = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
   const note = await fetchNoteById(id);
+  console.log(note);
 
   if (!note) {
     return {
