@@ -3,15 +3,16 @@ import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query
 import NoteDetailsClient from "./NoteDetails.client";
 import type { Metadata } from "next";
 
-type Props = {
-  params: Promise<{ id: string }>;
-};
+type RawParams = { params: { id: string } };
 
-type NextPageProps = { params: { id: string } };
+type Props = { params: Promise<{ id: string }> };
 
-export async function generateMetadata({ params }: NextPageProps): Promise<Metadata> {
-  const props: Props = { params: Promise.resolve(params) };
-  const { id } = await props.params;
+function asProps(p: Props): Props {
+  return p;
+}
+
+export async function generateMetadata({ params }: RawParams): Promise<Metadata> {
+  const { id } = await asProps({ params: Promise.resolve(params) }).params;
 
   const note = await fetchNoteById(id);
 
@@ -39,8 +40,9 @@ export async function generateMetadata({ params }: NextPageProps): Promise<Metad
   };
 }
 
-export default async function NoteDetailsPage({ params }: NextPageProps) {
-  const props: Props = { params: Promise.resolve(params) };
+export default async function NoteDetailsPage(raw: RawParams) {
+  const props = asProps({ params: Promise.resolve(raw.params) });
+
   const { id } = await props.params;
 
   const queryClient = new QueryClient();
